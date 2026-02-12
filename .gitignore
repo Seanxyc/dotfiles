@@ -1,0 +1,13 @@
+## macOS
+.DS_Store
+**/.DS_Store
+
+## Directories you don't want to sync
+clash/
+karabiner/
+
+## 通用缓存 / 临时文件
+*~
+*.swp
+*.swo
+*.log
