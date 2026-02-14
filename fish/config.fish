@@ -49,6 +49,42 @@ function nvm
     bass source /opt/homebrew/opt/nvm/nvm.sh';' nvm $argv
 end
 
+# Set nvm default node PATH on startup (so globally installed packages like pnpm persist across sessions)
+set -l _nvm_node_dir "$HOME/.nvm/versions/node"
+if test -d "$_nvm_node_dir"
+    set -l _nvm_default_file "$HOME/.nvm/alias/default"
+    set -l _nvm_node_bin ""
+
+    if test -f "$_nvm_default_file"
+        set -l _nvm_default (string trim (cat "$_nvm_default_file"))
+        # Try exact match first (e.g. "v20.11.0")
+        if test -d "$_nvm_node_dir/$_nvm_default/bin"
+            set _nvm_node_bin "$_nvm_node_dir/$_nvm_default/bin"
+        else
+            # Partial version (e.g. "20"), find matching installed version
+            for dir in (command ls -1 "$_nvm_node_dir" | sort -V)
+                if string match -q "v$_nvm_default*" -- "$dir"
+                    if test -d "$_nvm_node_dir/$dir/bin"
+                        set _nvm_node_bin "$_nvm_node_dir/$dir/bin"
+                    end
+                end
+            end
+        end
+    end
+
+    # Fallback: no default or no match, use latest installed version
+    if test -z "$_nvm_node_bin"
+        set -l _nvm_latest (command ls -1 "$_nvm_node_dir" | sort -V | tail -1)
+        if test -n "$_nvm_latest"; and test -d "$_nvm_node_dir/$_nvm_latest/bin"
+            set _nvm_node_bin "$_nvm_node_dir/$_nvm_latest/bin"
+        end
+    end
+
+    if test -n "$_nvm_node_bin"
+        fish_add_path --prepend "$_nvm_node_bin"
+    end
+end
+
 switch (uname)
     case Darwin
         source (dirname (status --current-filename))/config-osx.fish
