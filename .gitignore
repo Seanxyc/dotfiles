@@ -6,6 +6,11 @@
 clash/
 karabiner/
 
+## fish
+fish/fish_variables
+
+## nvim
+
 ## 通用缓存 / 临时文件
 *~
 *.swp
